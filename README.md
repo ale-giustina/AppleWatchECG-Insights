@@ -2,8 +2,9 @@
 Visualization tools for ECG waveform data from apple watch.
 
 ## Example images
-![image](Examples/Figure_1.png)
-![image](Examples/Figure_2.png)
-![image](Examples/Figure_3_over_150_bpm.png)
-![image](Examples/Figure_4.png)
-
+![image](Examples/ecg_2024-08-19.png)
+![image](Examples/ecg_2024-08-20.png)
+![image](Examples/ecg_2024-08-21.png)
+![image](Examples/ecg_2024-08-24.png)
+![image](Examples/ecg_2024-08-26.png)
+![image](Examples/ecg_2024-08-03.png)
