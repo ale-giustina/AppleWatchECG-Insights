@@ -1,1 +1,1 @@
-CALCULATE R WAVE FROM 2ND DERIVATIVE BY FINDING THE MINIMUM VALUE BETWEEN TWO R PEAKS TO GENERALIZE BETTER
+fix misclassification given by glitch like in Examples\ecg_2024-08-26.png (file 4)
