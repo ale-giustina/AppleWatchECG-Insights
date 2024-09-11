@@ -42,7 +42,7 @@ def check_dist(point, peaks, dist=50):
     return True
 
 
-df = pd.read_csv('ECG/' + ecgfiles[5], header=None, skiprows=12)
+df = pd.read_csv('ECG/' + ecgfiles[0], header=None, skiprows=12)
 
 df = df [0]
 
@@ -72,7 +72,7 @@ for indx, l in enumerate(peaks_deriv_r):
     
     while l > 0:  
         l -= 1  
-        if avg_array[l] < prev_val and prev_val > 100: 
+        if avg_array[l] < prev_val: 
             r_peak.append(l+1)  
             break
         prev_val = avg_array[l]
@@ -106,8 +106,8 @@ r_peak=list(dict.fromkeys(r_peak))
 T_peak = []
 
 for indx, l in enumerate(r_peak[:-1]):
-    start_indx = l+10
-    end_indx = r_peak[indx+1]-10
+    start_indx = l+15
+    end_indx = r_peak[indx+1]-15
     T_peak.append(start_indx + np.argmax(avg_array[start_indx:end_indx]))
 
 fig, ax = plt.subplots(2,1,sharex=True)
