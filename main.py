@@ -437,6 +437,7 @@ plt.close()
 
 sample_rate = 512
 
+#extract data from peaks and remove outliers above 2 std dev
 Frequency, Sinus_RR, interval_ST, interval_QT, interval_QRS = data_extractor(detected_peaks, sample_rate, remove_outliers=2)
 
 rr_series = pd.Series(Sinus_RR, name='RR interval')
