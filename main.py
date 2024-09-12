@@ -1,9 +1,6 @@
 import numpy as np
-
 import matplotlib.pyplot as plt
-
 import pandas as pd
-
 import os
 
 
@@ -73,24 +70,26 @@ def check_dist(point, peaks, dist=50):
 
     return True
 
-filenum = 5
+
+
+
+filenum = 4
 
 df = pd.read_csv('ECG/' + ecgfiles[filenum], header=None, skiprows=12)
 
-
 df = df [0]
-
 
 array = np.array(df)
 
 der_array = derivative(array)
 
 
+
+#find R peaks based on the derivative
+
 peaks_deriv_r = peak_detector(der_array,-1000,-80,inverted=True)
 
-
 min_dist = 50
-
 
 for i in range(1, len(peaks_deriv_r)-1):
 
@@ -104,10 +103,8 @@ if peaks_deriv_r[-1] - peaks_deriv_r[-2] < min_dist:
 
 peaks_deriv_r = [i for i in peaks_deriv_r if i != 0]
 
-
-#find r peaks based on the derivative
+#find true r peaks based on the derivative
 r_peak=[]
-
 
 for indx, l in enumerate(peaks_deriv_r):
 
@@ -124,12 +121,12 @@ for indx, l in enumerate(peaks_deriv_r):
             break
         prev_val = array[l]
 
-
 r_peak=list(dict.fromkeys(r_peak))
 
 
-#find T peaks based on the min value between two R peaks in the derivative
 
+
+#find T peaks based on the min value between two R peaks in the derivative
 T_peak_deriv = []
 
 
@@ -137,7 +134,7 @@ for indx, l in enumerate(peaks_deriv_r[:-1]):
 
     start_indx = l+60
 
-    end_indx = peaks_deriv_r[indx+1]-100
+    end_indx = peaks_deriv_r[indx+1]-(peaks_deriv_r[indx+1]-start_indx)//2
 
     T_peak_deriv.append(start_indx + np.argmin(der_array[start_indx:end_indx]))
 
@@ -161,6 +158,11 @@ for indx, l in enumerate(T_peak_deriv):
 
 #make list unique
 T_peak=list(dict.fromkeys(T_peak))
+
+
+
+
+
 
 fig, ax = plt.subplots(2,1,sharex=True, figsize=(20,10))
 
