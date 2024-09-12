@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import Formatter
 import pandas as pd
 import os
+import seaborn as sns
+from matplotlib.patches import Rectangle
+import shutil
 
 def find_square(area):
     width = int((np.sqrt(area))+0.5)
@@ -74,14 +77,43 @@ def check_dist(point, peaks, dist=50):
 
 
 
-filenum = 5
+def data_extractor(peaks, sample_rate):
+
+    #peaks structure: [[Q_start, Q, R, S, S_end, T, T_end],[...],...]
+    #                   0        1  2  3  4      5  6  
+    Sinus_RR = []
+    Frequency = 0
+    interval_ST = []
+    interval_QT = []
+    interval_QRS = []
+
+    for i in range(len(peaks)-1):
+        
+        if i != len(peaks)-1:
+            Sinus_RR.append((peaks[i+1][2]-peaks[i][2])/sample_rate)
+        else:
+            Sinus_RR.append((peaks[i][2]-peaks[i-1][2])/sample_rate)
+
+        interval_ST.append((peaks[i][6]-peaks[i][4])/sample_rate)
+
+        interval_QT.append((peaks[i][6]-peaks[i][0])/sample_rate)
+
+        interval_QRS.append((peaks[i][4]-peaks[i][0])/sample_rate)
+    
+    Frequency = 60/(np.mean(Sinus_RR))
+    
+    return Frequency, Sinus_RR, interval_ST, interval_QT, interval_QRS
+
+
+
+filenum = 6
 filepath="ECG2"
 
 showentire = False
 showcuts = False
+showanalysis = False
 
-saveentire = True
-savecuts = True
+save_folder = True
 
 ecgfiles = os.listdir(filepath)
 df = pd.read_csv(f'{filepath}/' + ecgfiles[filenum], header=None, skiprows=12)
@@ -91,6 +123,15 @@ array = np.array(df)
 
 der_array = derivative(array)
 
+if save_folder:
+
+    if os.path.isdir(ecgfiles[filenum].split('.')[0]) == False:
+        os.mkdir(ecgfiles[filenum].split('.')[0])
+    else:
+        shutil.rmtree(ecgfiles[filenum].split('.')[0])
+        os.mkdir(ecgfiles[filenum].split('.')[0])
+
+    save_folder = ecgfiles[filenum].split('.')[0]
 
 #find R peaks based on the derivative
 peaks_deriv_r = peak_detector(der_array,-1000,-80,inverted=True)
@@ -171,19 +212,6 @@ for indx, l in enumerate(T_peak_deriv):
         
         prev_val = array[strt_in]
     
-    #find end peak with normal graph
-
-    # while l > 0:
-
-    #     l += 1
-
-    #     if array[l] > prev_val:
-
-    #         T_peaks_end.append(l-1)
-    #         break
-        
-    #     prev_val = array[l]
-
     #find end peak with derivative
 
     prev_val = der_array[l]
@@ -194,9 +222,9 @@ for indx, l in enumerate(T_peak_deriv):
 
         l += 1
 
-        if der_array[l] < prev_val or der_array[l] > -5:
+        if der_array[l] < prev_val or der_array[l] > -3:
             if num_of_t > 3:
-                T_peaks_end.append(l+6)
+                T_peaks_end.append(l+14)
                 break
             else:
                 num_of_t+=1
@@ -309,15 +337,14 @@ ax[0].plot(Q_start_peaks, [array[i] for i in Q_start_peaks], 'o', label='Q start
 ax[0].legend()
 ax[0].grid()
 
-
 ax[1].plot(der_array)
 ax[1].plot(peaks_deriv_r, [der_array[i] for i in peaks_deriv_r], 'ro', label='R peaks')
 ax[1].plot(T_peak_deriv, [der_array[i] for i in T_peak_deriv], 'bo', label='T peaks')
 ax[1].legend()
 ax[1].grid()
 
-if saveentire:
-    plt.savefig('Examples/' + ecgfiles[filenum].split('.')[0] + '.png')
+if save_folder:
+    plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_entire.png')
     print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
 
 if showentire:
@@ -361,6 +388,74 @@ fig.legend(['microvolt','Q start peak','Q peak','R peak','S peak','S end peak','
 
 if showcuts:
     plt.show()
-if savecuts:
-    plt.savefig('Examples2/' + ecgfiles[filenum].split('.')[0] + '.png')
+if save_folder:
+    plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_single_peaks.png')
     print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
+
+plt.close()
+
+sample_rate = 512
+
+Frequency, Sinus_RR, interval_ST, interval_QT, interval_QRS = data_extractor(detected_peaks, sample_rate)
+
+data={'Sinus_RR':Sinus_RR, 'interval_ST':interval_ST, 'interval_QT':interval_QT, 'interval_QRS':interval_QRS}
+
+df = pd.DataFrame(data)
+
+sns.stripplot(data=df, jitter=0.2, size=3)
+
+rr_normalrange = [0.6,1.2]
+st_normalrange = [(0.08+0.160),(0.12+0.160)]
+qt_normalrange = [0.390,0.420]
+qrs_normalrange = [0.08,0.10]
+
+plt.gca().add_patch(Rectangle((-0.3,rr_normalrange[0]),0.6,rr_normalrange[1]-rr_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
+plt.gca().add_patch(Rectangle((0.7,st_normalrange[0]),0.6,st_normalrange[1]-st_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
+plt.gca().add_patch(Rectangle((1.7,qt_normalrange[0]),0.6,qt_normalrange[1]-qt_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
+plt.gca().add_patch(Rectangle((2.7,qrs_normalrange[0]),0.6,qrs_normalrange[1]-qrs_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
+
+if showanalysis:
+    plt.show()
+if save_folder:
+
+    plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_analysis.png')
+    print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
+
+#create log file
+
+df = pd.read_csv(f'{filepath}/' + ecgfiles[filenum], header=None)
+
+#%of datapoints out of norm
+rr_outofnorm = len([i for i in Sinus_RR if i < rr_normalrange[0] or i > rr_normalrange[1]])/len(Sinus_RR)*100
+st_outofnorm = len([i for i in interval_ST if i < st_normalrange[0] or i > st_normalrange[1]])/len(interval_ST)*100
+qt_outofnorm = len([i for i in interval_QT if i < qt_normalrange[0] or i > qt_normalrange[1]])/len(interval_QT)*100
+qrs_outofnorm = len([i for i in interval_QRS if i < qrs_normalrange[0] or i > qrs_normalrange[1]])/len(interval_QRS)*100
+
+if save_folder:
+
+    with open(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_log.txt', 'w') as f:
+        f.write(f'File: {ecgfiles[filenum]}\n')
+        f.write(f'{df[0][0]}: {df[1][0]}\n')
+        f.write(f'{df[0][1]}: {df[1][1]}\n')
+        f.write(f'{df[0][2]}: {df[1][2]}\n')
+        f.write(f'{df[0][3]}: {df[1][3]}\n')
+        f.write(f'{df[0][4]}: {df[1][4]}\n')
+        f.write(f'{df[0][5]}: {df[1][5]}\n')
+        f.write(f'{df[0][6]}: {df[1][6]}\n')
+        f.write(f'{df[0][7]}: {df[1][7]}\n')
+        f.write(f'{df[0][8]}: {df[1][8]}\n')
+        f.write(f'{df[0][9]}: {df[1][9]}\n\n')
+
+        f.write(f'avg Frequency: {Frequency}\n\n')
+        f.write(f'normal RR range: {rr_normalrange[0]*1000}-{rr_normalrange[1]*1000}\n')
+        f.write(f'avg Sinus RR: {np.round(np.mean(Sinus_RR)*1000,2)}ms,\nstd dev: {np.round(np.std(Sinus_RR)*1000,2)}ms,\n% of out of norm: {np.round(rr_outofnorm,2)}%\n\n')
+        f.write(f'normal ST range: {st_normalrange[0]*1000}-{st_normalrange[1]*1000}\n')
+        f.write(f'avg interval ST: {np.round(np.mean(interval_ST)*1000,2)}ms,\nstd dev: {np.round(np.std(interval_ST)*1000,2)}ms,\n% of out of norm: {np.round(st_outofnorm,2)}%\n\n')
+        f.write(f'normal QT range: {qt_normalrange[0]*1000}-{qt_normalrange[1]*1000}\n')
+        f.write(f'avg interval QT: {np.round(np.mean(interval_QT)*1000,2)}ms,\nstd dev: {np.round(np.std(interval_QT)*1000,2)}ms,\n% of out of norm: {np.round(qt_outofnorm,2)}%\n\n')
+        f.write(f'normal QRS range: {qrs_normalrange[0]*1000}-{qrs_normalrange[1]*1000}\n')
+        f.write(f'avg interval QRS: {np.round(np.mean(interval_QRS)*1000,2)}ms,\nstd dev: {np.round(np.std(interval_QRS)*1000,2)}ms,\n% of out of norm: {np.round(qrs_outofnorm,2)}%\n\n')
+
+
+        
+
