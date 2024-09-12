@@ -9,13 +9,13 @@ The norm values have been set to the default values for a healthy adult<sup>[[1]
 
 ## EXAMPLE
 Example of the whole waveform analysis
-![Example of the whole waveform analysis](ecg_2024-09-12_4\ecg_2024-09-12_4_entire.png)
+![Example of the whole waveform analysis](Examples/ecg_2024-09-12_4\ecg_2024-09-12_4_entire.png)
 Example of the single peaks analysis
-![Example of the single peaks analysis](ecg_2024-09-12_4\ecg_2024-09-12_4_single_peaks.png)
+![Example of the single peaks analysis](Examples/ecg_2024-09-12_4\ecg_2024-09-12_4_single_peaks.png)
 Example of the poincare variability graph
-![Example of the poincare variability graph](ecg_2024-09-12_4\ecg_2024-09-12_4_poincare.png)
+![Example of the poincare variability graph](Examples/ecg_2024-09-12_4\ecg_2024-09-12_4_poincare.png)
 Example of the analysis graphs
-![Example of the analysis graphs](ecg_2024-09-12_4\ecg_2024-09-12_4_analysis.png)
+![Example of the analysis graphs](Examples/ecg_2024-09-12_4\ecg_2024-09-12_4_analysis.png)
 Example of the log file
 
 ```
