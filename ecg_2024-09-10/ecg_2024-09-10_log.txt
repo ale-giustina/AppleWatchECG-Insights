@@ -1,6 +1,4 @@
 File: ecg_2024-09-10.csv
-Name: Alessandro
-Date of Birth: 25 Sep 2006
 Recorded Date: 2024-09-10 22:51:48 +0200
 Classification: Sinus Rhythm
 Symptoms: nan

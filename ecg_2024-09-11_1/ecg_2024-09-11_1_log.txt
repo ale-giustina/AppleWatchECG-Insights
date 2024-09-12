@@ -1,6 +1,4 @@
 File: ecg_2024-09-11_1.csv
-Name: Alessandro
-Date of Birth: 25 Sep 2006
 Recorded Date: 2024-09-11 16:52:57 +0200
 Classification: Sinus Rhythm
 Symptoms: nan
@@ -8,7 +6,7 @@ Software Version: 1.90
 Device: Watch7,2
 Sample Rate: 512 hertz
 Lead: Lead I
-Unit: µV
+Unit: ï¿½V
 
 avg Frequency: 72.50815688996876
 
