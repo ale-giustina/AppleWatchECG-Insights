@@ -121,16 +121,38 @@ def data_extractor(peaks, sample_ratem, remove_outliers=0):
 
 
 
-filenum = 10
+
+
+#SETTINGS
+
+#filename or index of the file in the folder
+filenum = "ecg_2024-09-11_3.csv"
+
+#folder path
 filepath="ECG2"
 
+#show plots interactively
 showentire = False
 showcuts = False
 showanalysis = False
+showpoincare = False
 
+#save to folder
 save_folder = True
 
+
+
+
+
+
+
 ecgfiles = os.listdir(filepath)
+
+if type(filenum) is str:
+    try:
+        filenum = ecgfiles.index(filenum)
+    except:
+        raise Exception('File not found')
 
 ECG_filename = ecgfiles[filenum]
 
@@ -461,7 +483,7 @@ ax.set_title('Poincare plot, RMSSD: '+str(np.round(RMSSD*1000,2))+'ms')
 ax.set_ylim(0,1.6)
 ax.set_xlim(0,1.6)
 
-if showanalysis:
+if showpoincare:
     plt.show()
 if save_folder:
     plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_poincare.png')
