@@ -1,0 +1,37 @@
+File: ecg_2024-09-12_3.csv
+Name: Alessandro
+Date of Birth: 25 Sep 2006
+Recorded Date: 2024-09-12 14:21:30 +0200
+Classification: Sinus Rhythm
+Symptoms: nan
+Software Version: 1.90
+Device: Watch7,2
+Sample Rate: 512 hertz
+Lead: Lead I
+Unit: µV
+
+avg Frequency: 78.22031626909676
+
+normal RMSSD interval: 19-107ms
+RMSSD: 37.32ms
+
+normal RR range: 600.0-1200.0
+avg Sinus RR: 758.08ms,
+std dev: 46.3ms,
+% of out of norm: 0.0%
+
+normal ST range: 260.0-300.0
+avg interval ST: 291.02ms,
+std dev: 14.5ms,
+% of out of norm: 24.32%
+
+normal QT range: 350.0-470.0
+avg interval QT: 387.14ms,
+std dev: 11.99ms,
+% of out of norm: 0.0%
+
+normal QRS range: 60.0-120.0
+avg interval QRS: 96.71ms,
+std dev: 6.82ms,
+% of out of norm: 0.0%
+

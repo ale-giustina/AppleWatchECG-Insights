@@ -12,19 +12,26 @@ Unit: µV
 
 avg Frequency: 70.08365019011407
 
+normal RMSSD interval: 19-107ms
+RMSSD: 70.04ms
+
+normal RR range: 600.0-1200.0
 avg Sinus RR: 856.12ms,
 std dev: 77.08ms,
 % of out of norm: 0.0%
 
-avg interval ST: 287.58ms,
-std dev: 62.02ms,
-% of out of norm: 75.76%
+normal ST range: 260.0-300.0
+avg interval ST: 308.93ms,
+std dev: 19.19ms,
+% of out of norm: 68.97%
 
-avg interval QT: 385.77ms,
-std dev: 62.41ms,
-% of out of norm: 72.73%
+normal QT range: 350.0-470.0
+avg interval QT: 409.77ms,
+std dev: 29.67ms,
+% of out of norm: 3.33%
 
+normal QRS range: 60.0-120.0
 avg interval QRS: 98.19ms,
 std dev: 18.67ms,
-% of out of norm: 48.48%
+% of out of norm: 24.24%
 

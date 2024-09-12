@@ -77,7 +77,7 @@ def check_dist(point, peaks, dist=50):
 
 
 
-def data_extractor(peaks, sample_rate):
+def data_extractor(peaks, sample_ratem, remove_outliers=0):
 
     #peaks structure: [[Q_start, Q, R, S, S_end, T, T_end],[...],...]
     #                   0        1  2  3  4      5  6  
@@ -101,12 +101,27 @@ def data_extractor(peaks, sample_rate):
         interval_QRS.append((peaks[i][4]-peaks[i][0])/sample_rate)
     
     Frequency = 60/(np.mean(Sinus_RR))
+
+    if remove_outliers != 0:
+        sinus_rr_mean = np.mean(Sinus_RR)
+        sinus_rr_std = np.std(Sinus_RR)
+        interval_st_mean = np.mean(interval_ST)
+        interval_st_std = np.std(interval_ST)
+        interval_qt_mean = np.mean(interval_QT)
+        interval_qt_std = np.std(interval_QT)
+        interval_qrs_mean = np.mean(interval_QRS)
+        interval_qrs_std = np.std(interval_QRS)
+        
+        Sinus_RR = [i for i in Sinus_RR if i > sinus_rr_mean-remove_outliers*sinus_rr_std and i < sinus_rr_mean+remove_outliers*sinus_rr_std]
+        interval_ST = [i for i in interval_ST if i > interval_st_mean-remove_outliers*interval_st_std and i < interval_st_mean+remove_outliers*interval_st_std]
+        interval_QT = [i for i in interval_QT if i > interval_qt_mean-remove_outliers*interval_qt_std and i < interval_qt_mean+remove_outliers*interval_qt_std]
+        interval_QRS = [i for i in interval_QRS if i > interval_qrs_mean-remove_outliers*interval_qrs_std and i < interval_qrs_mean+remove_outliers*interval_qrs_std]
     
     return Frequency, Sinus_RR, interval_ST, interval_QT, interval_QRS
 
 
 
-filenum = 6
+filenum = 10
 filepath="ECG2"
 
 showentire = False
@@ -116,7 +131,10 @@ showanalysis = False
 save_folder = True
 
 ecgfiles = os.listdir(filepath)
-df = pd.read_csv(f'{filepath}/' + ecgfiles[filenum], header=None, skiprows=12)
+
+ECG_filename = ecgfiles[filenum]
+
+df = pd.read_csv(f'{filepath}/' + ECG_filename, header=None, skiprows=12)
 
 df = df [0]
 array = np.array(df)
@@ -125,13 +143,13 @@ der_array = derivative(array)
 
 if save_folder:
 
-    if os.path.isdir(ecgfiles[filenum].split('.')[0]) == False:
-        os.mkdir(ecgfiles[filenum].split('.')[0])
+    if os.path.isdir(ECG_filename.split('.')[0]) == False:
+        os.mkdir(ECG_filename.split('.')[0])
     else:
-        shutil.rmtree(ecgfiles[filenum].split('.')[0])
-        os.mkdir(ecgfiles[filenum].split('.')[0])
+        shutil.rmtree(ECG_filename.split('.')[0])
+        os.mkdir(ECG_filename.split('.')[0])
 
-    save_folder = ecgfiles[filenum].split('.')[0]
+    save_folder = ECG_filename.split('.')[0]
 
 #find R peaks based on the derivative
 peaks_deriv_r = peak_detector(der_array,-1000,-80,inverted=True)
@@ -143,13 +161,14 @@ for i in range(1, len(peaks_deriv_r)-1):
 
     if peaks_deriv_r[i] - peaks_deriv_r[i-1] < min_dist:
 
-        peaks_deriv_r[i] = 0
+        peaks_deriv_r[i-1] = 0
 
 if peaks_deriv_r[-1] - peaks_deriv_r[-2] < min_dist:
 
     peaks_deriv_r[-1] = 0
 
 peaks_deriv_r = [i for i in peaks_deriv_r if i != 0]
+
 
 
 #find true r peaks based on the derivative
@@ -396,29 +415,56 @@ plt.close()
 
 sample_rate = 512
 
-Frequency, Sinus_RR, interval_ST, interval_QT, interval_QRS = data_extractor(detected_peaks, sample_rate)
+Frequency, Sinus_RR, interval_ST, interval_QT, interval_QRS = data_extractor(detected_peaks, sample_rate, remove_outliers=2)
 
-data={'Sinus_RR':Sinus_RR, 'interval_ST':interval_ST, 'interval_QT':interval_QT, 'interval_QRS':interval_QRS}
+rr_series = pd.Series(Sinus_RR, name='RR interval')
+st_series = pd.Series(interval_ST, name='ST interval')
+qt_series = pd.Series(interval_QT, name='QT interval')
+qrs_series = pd.Series(interval_QRS, name='QRS interval')
 
-df = pd.DataFrame(data)
+df = pd.concat([rr_series, st_series, qt_series, qrs_series], axis=1)
 
-sns.stripplot(data=df, jitter=0.2, size=3)
 
 rr_normalrange = [0.6,1.2]
-st_normalrange = [(0.08+0.160),(0.12+0.160)]
-qt_normalrange = [0.390,0.420]
-qrs_normalrange = [0.08,0.10]
 
-plt.gca().add_patch(Rectangle((-0.3,rr_normalrange[0]),0.6,rr_normalrange[1]-rr_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
-plt.gca().add_patch(Rectangle((0.7,st_normalrange[0]),0.6,st_normalrange[1]-st_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
-plt.gca().add_patch(Rectangle((1.7,qt_normalrange[0]),0.6,qt_normalrange[1]-qt_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
-plt.gca().add_patch(Rectangle((2.7,qrs_normalrange[0]),0.6,qrs_normalrange[1]-qrs_normalrange[0],linewidth=1,edgecolor='r',facecolor='none'))
+T_wave = 0.180
+
+st_normalrange = [(0.08+T_wave),(0.12+T_wave)] #https://www.sciencedirect.com/topics/medicine-and-dentistry/st-segment
+qt_normalrange = [0.350,0.470] #https://www.sciencedirect.com/topics/medicine-and-dentistry/qt-interval
+qrs_normalrange = [0.06,0.12] #https://www.sciencedirect.com/topics/medicine-and-dentistry/qrs-complex
+
+plt.gca().add_patch(Rectangle((-0.3,rr_normalrange[0]),0.75,rr_normalrange[1]-rr_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((0.7,st_normalrange[0]),0.75,st_normalrange[1]-st_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((1.7,qt_normalrange[0]),0.75,qt_normalrange[1]-qt_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((2.7,qrs_normalrange[0]),0.75,qrs_normalrange[1]-qrs_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+
+
+sns.stripplot(data=df, jitter=0.3, size=3)
 
 if showanalysis:
     plt.show()
 if save_folder:
 
     plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_analysis.png')
+    print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
+
+RMSSD = np.sqrt(np.mean(np.square(np.diff(Sinus_RR))))
+
+#Poincare and variability plot
+fig, ax = plt.subplots(1,1, figsize=(10,10))
+
+ax.scatter(Sinus_RR[:-1], Sinus_RR[1:], s=15)
+ax.set_xlabel('RR(n)')
+ax.set_ylabel('RR(n+1)')
+ax.set_title('Poincare plot, RMSSD: '+str(np.round(RMSSD*1000,2))+'ms')
+
+ax.set_ylim(0,1.6)
+ax.set_xlim(0,1.6)
+
+if showanalysis:
+    plt.show()
+if save_folder:
+    plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_poincare.png')
     print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
 
 #create log file
@@ -447,6 +493,8 @@ if save_folder:
         f.write(f'{df[0][9]}: {df[1][9]}\n\n')
 
         f.write(f'avg Frequency: {Frequency}\n\n')
+        f.write(f'normal RMSSD interval: 19-107ms\n')
+        f.write(f'RMSSD: {np.round(RMSSD*1000,2)}ms\n\n')
         f.write(f'normal RR range: {rr_normalrange[0]*1000}-{rr_normalrange[1]*1000}\n')
         f.write(f'avg Sinus RR: {np.round(np.mean(Sinus_RR)*1000,2)}ms,\nstd dev: {np.round(np.std(Sinus_RR)*1000,2)}ms,\n% of out of norm: {np.round(rr_outofnorm,2)}%\n\n')
         f.write(f'normal ST range: {st_normalrange[0]*1000}-{st_normalrange[1]*1000}\n')
