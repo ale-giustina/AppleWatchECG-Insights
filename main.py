@@ -456,10 +456,10 @@ st_normalrange = [(0.08+T_wave),(0.12+T_wave)] #https://www.sciencedirect.com/to
 qt_normalrange = [0.350,0.470] #https://www.sciencedirect.com/topics/medicine-and-dentistry/qt-interval
 qrs_normalrange = [0.06,0.12] #https://www.sciencedirect.com/topics/medicine-and-dentistry/qrs-complex
 
-plt.gca().add_patch(Rectangle((-0.3,rr_normalrange[0]),0.75,rr_normalrange[1]-rr_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
-plt.gca().add_patch(Rectangle((0.7,st_normalrange[0]),0.75,st_normalrange[1]-st_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
-plt.gca().add_patch(Rectangle((1.7,qt_normalrange[0]),0.75,qt_normalrange[1]-qt_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
-plt.gca().add_patch(Rectangle((2.7,qrs_normalrange[0]),0.75,qrs_normalrange[1]-qrs_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((-0.4,rr_normalrange[0]),0.8,rr_normalrange[1]-rr_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((0.6,st_normalrange[0]),0.8,st_normalrange[1]-st_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((1.6,qt_normalrange[0]),0.8,qt_normalrange[1]-qt_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
+plt.gca().add_patch(Rectangle((2.6,qrs_normalrange[0]),0.8,qrs_normalrange[1]-qrs_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
 
 
 sns.stripplot(data=df, jitter=0.3, size=3)
