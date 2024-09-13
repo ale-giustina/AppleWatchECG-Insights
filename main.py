@@ -7,6 +7,8 @@ import seaborn as sns
 from matplotlib.patches import Rectangle
 import shutil
 
+plt.switch_backend('agg')
+
 def find_square(area):
     width = int((np.sqrt(area))+0.5)
     for i in range(width, 0, -1):
@@ -130,7 +132,7 @@ showanalysis = False
 showpoincare = False
 
 #save to folder
-save_folder = True
+save_folder = 'example'
 save_svg = False
 
 sample_rate = 512
@@ -155,7 +157,7 @@ def analysis(filenum, filepath, showentire=False, showcuts=False, showanalysis=F
 
     der_array = derivative(array)
 
-    if save_folder:
+    if save_folder == True:
 
         if os.path.isdir(ECG_filename.split('.')[0]) == False:
             os.mkdir(ECG_filename.split('.')[0])
@@ -488,6 +490,8 @@ def analysis(filenum, filepath, showentire=False, showcuts=False, showanalysis=F
             plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_analysis.svg')
         print('saved: '+ ecgfiles[filenum].split('.')[0] + '_analysis.png')
 
+    plt.close()
+
     RMSSD = np.sqrt(np.mean(np.square(np.diff(Sinus_RR))))
 
     #Poincare and variability plot
@@ -508,6 +512,8 @@ def analysis(filenum, filepath, showentire=False, showcuts=False, showanalysis=F
         if save_svg:
             plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_poincare.svg')
         print('saved: '+ ecgfiles[filenum].split('.')[0] + '_poincare.png')
+
+    plt.close()
 
     #create log file
 
