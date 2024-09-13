@@ -126,7 +126,7 @@ def data_extractor(peaks, sample_ratem, remove_outliers=0):
 #SETTINGS
 
 #filename or index of the file in the folder
-filenum = "ecg_2024-09-11_3.csv"
+filenum = "ecg_2024-09-12_4.csv"
 
 #folder path
 filepath="ECG2"
@@ -139,10 +139,7 @@ showpoincare = False
 
 #save to folder
 save_folder = True
-
-
-
-
+save_svg = False
 
 
 
@@ -152,7 +149,7 @@ if type(filenum) is str:
     try:
         filenum = ecgfiles.index(filenum)
     except:
-        raise Exception('File not found')
+        raise Exception('File not found: '+filepath+"/"+filenum)
 
 ECG_filename = ecgfiles[filenum]
 
@@ -375,18 +372,31 @@ ax[0].plot(Q_peaks, [array[i] for i in Q_peaks], 'co', label='Q peaks')
 ax[0].plot(S_peaks, [array[i] for i in S_peaks], 'bo', label='S peaks')
 ax[0].plot(S_end_peaks, [array[i] for i in S_end_peaks], 'o', label='S end peaks', color="gray")
 ax[0].plot(Q_start_peaks, [array[i] for i in Q_start_peaks], 'o', label='Q start peaks', color="orange")
+
+ax[0].set_xticks(np.arange(0,len(array),512/2),)
+
+#25 ticks per second
+ax[0].set_xticks(np.arange(0,len(array),512/25*5),)
+#convert to seconds
+ax[0].set_xticklabels(np.arange(0,(len(array))/512*1000,1/25*5*1000),)
+ax[1].tick_params(axis='x', rotation=45)
+ax[0].set_xlabel('ms')
+ax[0].set_ylabel('microvolt')
 ax[0].legend()
 ax[0].grid()
 
 ax[1].plot(der_array)
 ax[1].plot(peaks_deriv_r, [der_array[i] for i in peaks_deriv_r], 'ro', label='R peaks')
 ax[1].plot(T_peak_deriv, [der_array[i] for i in T_peak_deriv], 'bo', label='T peaks')
+ax[1].set_xlabel('ms')
 ax[1].legend()
 ax[1].grid()
 
 if save_folder:
     plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_entire.png')
-    print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
+    if save_svg:
+        plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_entire.svg')
+    print('saved: '+ ecgfiles[filenum].split('.')[0] + '_entire.png')
 
 if showentire:
     plt.show()
@@ -407,8 +417,11 @@ inx, iny = 0, 0
 
 fig, ax = plt.subplots(wid, hei, figsize=(50,30))
 
+fig.suptitle('Single beats, sample rate: 512Hz')
+
 for index, peak in enumerate(detected_peaks):
     
+
     ax[inx, iny].plot(array[peak[0]:peak[6]])
     ax[inx, iny].plot(0, array[peak[0]], 'o', label='Start Q peak', color="orange")
     ax[inx, iny].plot(peak[1]-peak[0], array[peak[1]], 'co', label='Q peak')
@@ -418,6 +431,13 @@ for index, peak in enumerate(detected_peaks):
     ax[inx, iny].plot(peak[5]-peak[0], array[peak[5]], 'ro', label='T peak')
     ax[inx, iny].plot(peak[6]-peak[0], array[peak[6]], 'o', label='T peak end', color="black")
     ax[inx, iny].grid()
+
+    #25 ticks per second
+    ax[inx, iny].set_xticks(np.arange(0,peak[6]-peak[0],512/25),)
+    #convert to seconds
+    ax[inx, iny].set_xticklabels(np.arange(0,(peak[6]-peak[0])/512*1000,1/25*1000),)
+    ax[inx, iny].set_xlabel('ms')
+    ax[inx, iny].set_ylabel('microvolt')
 
     iny+=1
 
@@ -431,6 +451,8 @@ if showcuts:
     plt.show()
 if save_folder:
     plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_single_peaks.png')
+    if save_svg:
+        plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_single_peaks.svg')
     print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
 
 plt.close()
@@ -460,7 +482,7 @@ plt.gca().add_patch(Rectangle((-0.4,rr_normalrange[0]),0.8,rr_normalrange[1]-rr_
 plt.gca().add_patch(Rectangle((0.6,st_normalrange[0]),0.8,st_normalrange[1]-st_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
 plt.gca().add_patch(Rectangle((1.6,qt_normalrange[0]),0.8,qt_normalrange[1]-qt_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
 plt.gca().add_patch(Rectangle((2.6,qrs_normalrange[0]),0.8,qrs_normalrange[1]-qrs_normalrange[0],linewidth=1,edgecolor='g',facecolor='green', alpha=0.2))
-
+plt.ylabel('s')
 
 sns.stripplot(data=df, jitter=0.3, size=3)
 
@@ -469,12 +491,14 @@ if showanalysis:
 if save_folder:
 
     plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_analysis.png')
-    print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
+    if save_svg:
+        plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_analysis.svg')
+    print('saved: '+ ecgfiles[filenum].split('.')[0] + '_analysis.png')
 
 RMSSD = np.sqrt(np.mean(np.square(np.diff(Sinus_RR))))
 
 #Poincare and variability plot
-fig, ax = plt.subplots(1,1, figsize=(10,10))
+fig, ax = plt.subplots(1,1, figsize=(7,7))
 
 ax.scatter(Sinus_RR[:-1], Sinus_RR[1:], s=15)
 ax.set_xlabel('RR(n)')
@@ -488,7 +512,9 @@ if showpoincare:
     plt.show()
 if save_folder:
     plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_poincare.png')
-    print('saved: '+ ecgfiles[filenum].split('.')[0] + '.png')
+    if save_svg:
+        plt.savefig(f'{save_folder}/' + ecgfiles[filenum].split('.')[0] + '_poincare.svg')
+    print('saved: '+ ecgfiles[filenum].split('.')[0] + '_poincare.png')
 
 #create log file
 
