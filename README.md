@@ -71,5 +71,5 @@ std dev: 6.57ms,
 [3] https://www.sciencedirect.com/topics/medicine-and-dentistry/qrs-complex
 
 ## DISCLAIMER
-This program is not a medical device and should not be used as a diagnostic tool or to make medical decision. If in doubt, consult a medical professional.
+This program is not a medical software and should not be used as a diagnostic tool or to make medical decision. If in doubt, consult a medical professional.
 
